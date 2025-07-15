@@ -1,6 +1,6 @@
-# An Implementation of Edito in Rust for Learning Purposes
+# An Implementation of Edito in Rust
 
 See also: [Edito in C](https://github.com/Bao-Trinh-Quoc/cs50-final-project)
 
-# Reasons for this Implementation
+# Reason for this Implementation
 Because why not?
