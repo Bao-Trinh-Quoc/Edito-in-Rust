@@ -1,4 +1,5 @@
-mod editor;
+#![warn(clippy::all, clippy::pedantic)]
+mod editor; 
 use editor::Editor;
 
 fn main() {
@@ -7,3 +8,4 @@ fn main() {
 
     editor.run();
 }
+
