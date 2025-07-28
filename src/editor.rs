@@ -1,5 +1,7 @@
-use crossterm::event::{Event::Key, KeyCode::Char, read, KeyEvent, KeyModifiers};
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+use crossterm::event::{Event::Key, KeyCode::Char, read, KeyEvent, KeyModifiers, Event};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType};
+use crossterm::execute;
+use std::io::stdout;
 
 pub struct Editor {
     should_quit: bool,
@@ -11,33 +13,56 @@ impl Editor {
             should_quit : false
         }
     }
-
+     
     pub fn run(&mut self) {
-        if let Err(err) = self.repl() {
-            panic!("{err:#?}");
-        }    
-        println!("Ending Edito \r\n");
+        Self::initialize().unwrap();
+        let result = self.repl();
+        Self::terminate().unwrap();
+        result.unwrap();
     }
 
     pub fn repl(&mut self) -> Result<(), std::io::Error> {
-        enable_raw_mode()?; 
         loop {
-            if let Key(KeyEvent {
-                code, modifiers, kind, state
-        }) = read()? {
-                println!("Code: {code:?} Modifiers: {modifiers:?} Kind: {kind:?} State: {state:?} \r");
-                match code {
-                        Char('q') if modifiers == KeyModifiers::CONTROL => {
-                            self.should_quit = true;
-                        }
-                        _ => (),               
-                }
-                if self.should_quit {
-                    break;
-                } 
-            } 
+            let event = read()?; 
+            self.evalute_event(&event);
+            self.refresh_screen()?;
+
+            if self.should_quit {
+                break;
+            }
         }
-        disable_raw_mode()?;
+        Ok(())
+    }
+
+    fn initialize() -> Result<(), std::io::Error> {
+        enable_raw_mode()?;
+        Self::clear_screen()
+    }
+
+    fn terminate() -> Result<(), std::io::Error> {
+        disable_raw_mode()
+    }
+    
+    fn clear_screen() -> Result<(), std::io::Error> {
+        let mut stdout = stdout();
+        execute!(stdout, Clear(ClearType::All))
+    }
+   
+    fn evalute_event(&mut self, event: &Event) {
+        if let keyEvent {
+            code: Char('q'),
+            modifiers: KeyModifiers::CONTROL,
+            ..
+        } = event {
+            self.should_quit = true;
+        } 
+    }
+    
+    fn refresh_screen(&self) -> Result<(), std::io::Error> {
+        if self.should_quit {
+            Self::clear_screen()?;                     
+            println!("Ending Edito \r\n");
+        }
         Ok(())
     }
 }
