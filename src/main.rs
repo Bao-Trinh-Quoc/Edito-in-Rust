@@ -4,8 +4,7 @@ use editor::Editor;
 
 fn main() {
     // println!("Hello, edito!");
-    let editor = Editor::default();
+    Editor::default().run();
 
-    editor.run();
 }
 
