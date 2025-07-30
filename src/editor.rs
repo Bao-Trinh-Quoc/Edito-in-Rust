@@ -49,11 +49,11 @@ impl Editor {
     }
    
     fn evalute_event(&mut self, event: &Event) {
-        if let keyEvent {
+        if let Key(KeyEvent {
             code: Char('q'),
             modifiers: KeyModifiers::CONTROL,
             ..
-        } = event {
+        }) = event {
             self.should_quit = true;
         } 
     }
