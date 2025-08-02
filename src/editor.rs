@@ -1,4 +1,8 @@
-use crossterm::event::{Event, Event::Key, KeyCode::Char, KeyEvent, KeyModifiers, read};
+use crossterm::event::{
+    Event::{self, Key},
+    KeyCode::Char,
+    KeyEvent, KeyModifiers, read,
+};
 mod terminal;
 use terminal::Terminal;
 
@@ -47,8 +51,10 @@ impl Editor {
             Terminal::clear_screen()?;
             println!("Ending Edito \r\n");
         } else {
+            Terminal::hide_cursor()?;
             Self::draw_rows()?;
             Terminal::move_cursor_to(0, 0)?;
+            Terminal::show_cursor()?;
         }
         Ok(())
     }
