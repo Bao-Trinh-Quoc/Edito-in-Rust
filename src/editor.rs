@@ -63,6 +63,7 @@ impl Editor {
         let terminal_size_y = Terminal::size()?.1;
         // Draw ~ in every row
         for current_row in 0..terminal_size_y {
+            Terminal::clear_line()?;
             print!("~");
             if current_row + 1 < terminal_size_y {
                 print!("\r\n");

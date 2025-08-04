@@ -22,6 +22,10 @@ impl Terminal {
         execute!(stdout(), Clear(ClearType::All))?;
         Ok(())
     }
+    pub fn clear_line() -> Result<(), std::io::Error> {
+        execute!(stdout(), Clear(ClearType::CurrentLine))?;
+        Ok(())
+    }
     pub fn move_cursor_to(x: u16, y: u16) -> Result<(), std::io::Error> {
         execute!(stdout(), MoveTo(x, y))?;
         Ok(())
