@@ -55,6 +55,7 @@ impl Editor {
             Terminal::print("Ending Edito \r\n")?;
         } else {
             Self::draw_rows()?;
+            Self::welcome_msg()?;
             Terminal::move_cursor_to(Position { x: 0, y: 0 })?;
         }
         Terminal::show_cursor()?;
@@ -72,6 +73,15 @@ impl Editor {
                 Terminal::print("\r\n")?;
             }
         }
+        Ok(())
+    }
+    fn welcome_msg() -> Result<(), Error> {
+        let Size { height, width } = Terminal::size()?;
+        Terminal::move_cursor_to(Position {
+            x: width / 2,
+            y: height / 3,
+        })?;
+        Terminal::print("Edito v.0.0.1")?;
         Ok(())
     }
 }
