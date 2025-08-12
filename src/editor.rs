@@ -3,9 +3,12 @@ use crossterm::event::{
     KeyCode::Char,
     KeyEvent, KeyModifiers, read,
 };
-use std::io::Error;
+use std::{env, io::Error};
 mod terminal;
 use terminal::{Position, Size, Terminal};
+
+const NAME: &str = env!("CARGO_PKG_NAME");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub struct Editor {
     should_quit: bool,
@@ -55,7 +58,6 @@ impl Editor {
             Terminal::print("Ending Edito \r\n")?;
         } else {
             Self::draw_rows()?;
-            Self::welcome_msg()?;
             Terminal::move_cursor_to(Position { x: 0, y: 0 })?;
         }
         Terminal::show_cursor()?;
@@ -68,20 +70,31 @@ impl Editor {
         // Draw ~ in every row
         for current_row in 0..height {
             Terminal::clear_line()?;
-            Terminal::print("~")?;
+            if current_row == height / 3 {
+                Self::draw_welcome_msg()?;
+            } else {
+                Self::draw_empty_row()?;
+            }
             if current_row + 1 < height {
                 Terminal::print("\r\n")?;
             }
         }
         Ok(())
     }
-    fn welcome_msg() -> Result<(), Error> {
-        let Size { height, width } = Terminal::size()?;
-        Terminal::move_cursor_to(Position {
-            x: width / 2,
-            y: height / 3,
-        })?;
-        Terminal::print("Edito v.0.0.1")?;
+    fn draw_empty_row() -> Result<(), Error> {
+        Terminal::print("~")?;
+        Ok(())
+    }
+    fn draw_welcome_msg() -> Result<(), Error> {
+        let mut welcom_msg = format!("{NAME} {VERSION}");
+        let width = Terminal::size()?.width as usize;
+        let len = welcom_msg.len();
+        let padding = (width - len) / 2;
+        let spaces = " ".repeat(padding - 1);
+
+        welcom_msg = format!("~{spaces} {welcom_msg}");
+        welcom_msg.truncate(width); // to avoid the message is too long
+        Terminal::print(welcom_msg)?;
         Ok(())
     }
 }
