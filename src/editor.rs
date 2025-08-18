@@ -19,6 +19,7 @@ pub struct Location {
 pub struct Editor {
     should_quit: bool,
     location: Location,
+    view: View,
 }
 
 impl Editor {
@@ -92,7 +93,7 @@ impl Editor {
             Terminal::clear_screen()?;
             Terminal::print("Ending Edito \r\n")?;
         } else {
-            View::render()?;
+            self.view.render()?;
             Terminal::move_caret_to(Position {
                 col: self.location.x,
                 row: self.location.y,
