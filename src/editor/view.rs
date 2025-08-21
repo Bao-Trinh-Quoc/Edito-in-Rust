@@ -49,4 +49,14 @@ impl View {
         }
         Ok(())
     }
+    pub fn load(&mut self, file_name: &str) -> Result<(), Error> {
+        // Opens file_name and reads its contents
+        let file_contents = std::fs::read_to_string(file_name)?;
+        // Clears old string if needed
+        self.buffer.lines = Vec::new();
+        for line in file_contents.lines() {
+            self.buffer.lines.push(String::from(line));
+        }
+        Ok(())
+    }
 }
