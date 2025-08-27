@@ -28,15 +28,10 @@ impl View {
         Terminal::print(&welcom_msg)?;
         Ok(())
     }
-    pub fn render(&self) -> Result<(), Error> {
+    pub fn render_welcome_screen() -> Result<(), Error> {
         let Size { height, .. } = Terminal::size()?;
         for current_row in 0..height {
             Terminal::clear_line()?;
-            if let Some(line) = self.buffer.lines.get(current_row) {
-                Terminal::print(line)?;
-                Terminal::print("\r\n")?;
-                continue;
-            }
             #[allow(clippy::integer_division)]
             if current_row == height / 3 {
                 Self::draw_welcome_msg()?;
@@ -49,14 +44,34 @@ impl View {
         }
         Ok(())
     }
-    pub fn load(&mut self, file_name: &str) -> Result<(), Error> {
-        // Opens file_name and reads its contents
-        let file_contents = std::fs::read_to_string(file_name)?;
-        // Clears old string if needed
-        self.buffer.lines = Vec::new();
-        for line in file_contents.lines() {
-            self.buffer.lines.push(String::from(line));
+    pub fn render_buffer(&self) -> Result<(), Error> {
+        let Size { height, .. } = Terminal::size()?;
+
+        for current_row in 0..height {
+            Terminal::clear_line()?;
+            if let Some(line) = self.buffer.lines.get(current_row) {
+                Terminal::print(line)?;
+                Terminal::print("\r\n")?;
+            } else {
+                Self::draw_empty_row()?;
+            }
+            if current_row.saturating_add(1) < height {
+                Terminal::print("\r\n")?;
+            }
         }
         Ok(())
+    }
+    pub fn render(&self) -> Result<(), Error> {
+        if self.buffer.is_empty() {
+            Self::render_welcome_screen()?;
+        } else {
+            self.render_buffer()?;
+        }
+        Ok(())
+    }
+    pub fn load(&mut self, file_name: &str) {
+        if let Ok(buffer) = Buffer::load(file_name) {
+            self.buffer = buffer;
+        }
     }
 }
