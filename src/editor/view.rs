@@ -54,9 +54,9 @@ impl View {
                 Terminal::print("\r\n")?;
             } else {
                 Self::draw_empty_row()?;
-            }
-            if current_row.saturating_add(1) < height {
-                Terminal::print("\r\n")?;
+                if current_row.saturating_add(1) < height {
+                    Terminal::print("\r\n")?;
+                }
             }
         }
         Ok(())
