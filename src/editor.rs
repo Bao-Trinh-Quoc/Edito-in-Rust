@@ -6,6 +6,7 @@ use crossterm::event::{
 };
 use std::env;
 use std::io::Error;
+use std::panic::{set_hook, take_hook};
 mod terminal;
 mod view;
 use terminal::{Position, Size, Terminal};
@@ -16,7 +17,7 @@ pub struct Location {
     x: usize,
     y: usize,
 }
-#[derive(Default)]
+
 pub struct Editor {
     should_quit: bool,
     location: Location,
@@ -24,12 +25,45 @@ pub struct Editor {
 }
 
 impl Editor {
+    pub fn new() -> Result<Self, Error> {
+        // Set the panic hook
+        let current_hook = take_hook();
+        set_hook(Box::new(move |panic_info| {
+            let _ = Terminal::terminate();
+            current_hook(panic_info);
+        }));
+        // Init the Terminal
+        Terminal::init()?;
+        // Attempt to load a file if applicable
+        let mut view = View::default();
+        let args: Vec<String> = env::args().collect();
+        if let Some(file_name) = args.get(1) {
+            view.load(file_name);
+        }
+
+        Ok(Self {
+            should_quit: false,
+            location: Location::default(),
+            view,
+        })
+    }
     pub fn run(&mut self) {
-        Terminal::init().unwrap();
-        self.handle_args();
-        let result = self.repl();
-        Terminal::terminate().unwrap();
-        result.unwrap();
+        loop {
+            self.refresh_screen();
+
+            if self.should_quit {
+                break;
+            }
+            match read() {
+                Ok(event) => self.evalute_event(event),
+                Err(err) => {
+                    #[cfg(debug_assertions)]
+                    {
+                        panic!("Could not read event: {err:?}");
+                    }
+                }
+            }
+        }
     }
     fn handle_args(&mut self) {
         let args: Vec<String> = env::args().collect();
