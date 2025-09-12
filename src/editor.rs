@@ -65,28 +65,9 @@ impl Editor {
             }
         }
     }
-    fn handle_args(&mut self) {
-        let args: Vec<String> = env::args().collect();
-        if let Some(file_name) = args.get(1) {
-            self.view.load(file_name);
-        }
-    }
-    // Read - Eval - Print loop
-    pub fn repl(&mut self) -> Result<(), Error> {
-        loop {
-            self.refresh_screen()?;
-
-            if self.should_quit {
-                break;
-            }
-            let event = read()?;
-            self.evalute_event(event)?;
-        }
-        Ok(())
-    }
-    fn move_point(&mut self, key_code: KeyCode) -> Result<(), Error> {
+    fn move_point(&mut self, key_code: KeyCode) {
         let Location { mut x, mut y } = self.location;
-        let Size { height, width } = Terminal::size()?;
+        let Size { height, width } = Terminal::size().unwrap_or_default();
         match key_code {
             KeyCode::Up => y = y.saturating_sub(1),
             KeyCode::Down => y = min(height.saturating_sub(1), y.saturating_add(1)),
@@ -99,10 +80,9 @@ impl Editor {
             _ => (),
         }
         self.location = Location { x, y };
-        Ok(())
     }
     #[allow(clippy::needless_pass_by_value)]
-    fn evalute_event(&mut self, event: Event) -> Result<(), Error> {
+    fn evalute_event(&mut self, event: Event) {
         match event {
             Event::Key(KeyEvent {
                 code,
@@ -122,7 +102,7 @@ impl Editor {
                     | KeyCode::End,
                     _,
                 ) => {
-                    self.move_point(code)?;
+                    self.move_point(code);
                 }
                 _ => {}
             },
@@ -135,25 +115,16 @@ impl Editor {
             }
             _ => {}
         }
-        Ok(())
     }
 
-    fn refresh_screen(&mut self) -> Result<(), Error> {
-        Terminal::hide_caret()?;
-        Terminal::move_caret_to(Position::default())?;
-
-        if self.should_quit {
-            Terminal::clear_screen()?;
-            Terminal::print("Ending Edito \r\n")?;
-        } else {
-            self.view.render()?;
-            Terminal::move_caret_to(Position {
-                col: self.location.x,
-                row: self.location.y,
-            })?;
-        }
-        Terminal::show_caret()?;
-        Terminal::execute()?;
-        Ok(())
+    fn refresh_screen(&mut self) {
+        let _ = Terminal::hide_caret();
+        self.view.render();
+        let _ = Terminal::move_caret_to(Position {
+            col: self.location.x,
+            row: self.location.y,
+        });
+        let _ = Terminal::show_caret();
+        let _ = Terminal::execute();
     }
 }

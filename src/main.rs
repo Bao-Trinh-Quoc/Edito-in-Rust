@@ -10,6 +10,6 @@ mod editor;
 use editor::Editor;
 
 fn main() {
-    Editor::default().run();
     // println!("Hello, edito!");
+    Editor::new().unwrap().run();
 }
